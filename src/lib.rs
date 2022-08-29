@@ -1,2 +1,2 @@
-pub mod notifier_item;
-pub mod notifier_watcher;
+pub mod proxy;
+pub mod service;

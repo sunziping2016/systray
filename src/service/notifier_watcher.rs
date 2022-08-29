@@ -26,8 +26,7 @@ impl StatusNotifierWatcher {
         Default::default()
     }
 
-    pub async fn run(cancel: CancellationToken) -> Result<()> {
-        let watcher = Self::new();
+    pub async fn run(self, cancel: CancellationToken) -> Result<()> {
         let connection = ConnectionBuilder::session()?
             .internal_executor(false)
             .build()
@@ -36,7 +35,7 @@ impl StatusNotifierWatcher {
         let mut name_owner_changed = dbus_proxy.receive_name_owner_changed().await?;
         let object_server = connection.object_server();
         object_server
-            .at(&STATUS_NOTIFIER_WATCHER_PATH, watcher)
+            .at(&STATUS_NOTIFIER_WATCHER_PATH, self)
             .await?;
         connection
             .request_name(&STATUS_NOTIFIER_WATCHER_SERVICE)
@@ -64,9 +63,7 @@ impl StatusNotifierWatcher {
         }
         Ok(())
     }
-}
 
-impl StatusNotifierWatcher {
     pub async fn handle_service_unregistered(
         &mut self,
         service: &BusName<'static>,
