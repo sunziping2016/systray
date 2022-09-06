@@ -1,0 +1,39 @@
+[options]
+work_mode = "normal"
+library = "Dbusmenu"
+version="0.4"
+target_path = "."
+min_cfg_version="0.4"
+
+girs_directories = ["../gir-files/"]
+
+generate_safety_asserts = true
+deprecate_by_min_version = true
+single_version_file = true
+
+generate = [
+    # "Dbusmenu.Client",
+    # "Dbusmenu.Server",
+]
+
+[[object]]
+name = "Dbusmenu.Menuitem"
+status = "generate"
+    [[object.function]]
+    name = "property_set_byte_array"
+    ignore = true
+    [[object.signal]]
+    name = "child-added"
+    ignore = true
+    [[object.signal]]
+    name = "child-moved"
+    ignore = true
+    [[object.signal]]
+    name = "child-removed"
+    ignore = true
+    [[object.signal]]
+    name = "event"
+    ignore = true
+    [[object.signal]]
+    name = "property-changed"
+    ignore = true

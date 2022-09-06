@@ -1,4 +1,4 @@
-use futures::StreamExt;
+use futures::{future::OptionFuture, Future, StreamExt};
 use std::collections::{HashMap, HashSet};
 use tokio_util::sync::CancellationToken;
 use tracing::info;
@@ -10,23 +10,32 @@ use zbus::{
     ConnectionBuilder, MessageHeader, Result, SignalContext,
 };
 
-pub const STATUS_NOTIFIER_WATCHER_SERVICE: WellKnownName =
+pub const NOTIFIER_WATCHER_SERVICE: WellKnownName =
     WellKnownName::from_static_str_unchecked("org.kde.StatusNotifierWatcher");
-pub const STATUS_NOTIFIER_WATCHER_PATH: ObjectPath =
+pub const NOTIFIER_WATCHER_PATH: ObjectPath =
     ObjectPath::from_static_str_unchecked("/StatusNotifierWatcher");
 
 #[derive(Debug, Default)]
-pub struct StatusNotifierWatcher {
+pub struct NotifierWatcher {
     items: HashMap<BusName<'static>, Vec<ObjectPath<'static>>>,
     hosts: HashSet<BusName<'static>>,
+    cancel: Option<CancellationToken>,
 }
 
-impl StatusNotifierWatcher {
+impl NotifierWatcher {
     pub fn new() -> Self {
         Default::default()
     }
 
-    pub async fn run(self, cancel: CancellationToken) -> Result<()> {
+    pub fn cancellable(self, cancel: CancellationToken) -> Self {
+        Self {
+            cancel: Some(cancel),
+            ..self
+        }
+    }
+
+    pub async fn run(mut self) -> Result<impl Future<Output = ()>> {
+        let mut cancel = self.cancel.take();
         let connection = ConnectionBuilder::session()?
             .internal_executor(false)
             .build()
@@ -34,34 +43,31 @@ impl StatusNotifierWatcher {
         let dbus_proxy = DBusProxy::new(&connection).await?;
         let mut name_owner_changed = dbus_proxy.receive_name_owner_changed().await?;
         let object_server = connection.object_server();
-        object_server
-            .at(&STATUS_NOTIFIER_WATCHER_PATH, self)
-            .await?;
-        connection
-            .request_name(&STATUS_NOTIFIER_WATCHER_SERVICE)
-            .await?;
+        object_server.at(&NOTIFIER_WATCHER_PATH, self).await?;
+        connection.request_name(&NOTIFIER_WATCHER_SERVICE).await?;
         let watch_ref = object_server
-            .interface::<_, StatusNotifierWatcher>(&STATUS_NOTIFIER_WATCHER_PATH)
+            .interface::<_, NotifierWatcher>(&NOTIFIER_WATCHER_PATH)
             .await?;
-        loop {
-            tokio::select! {
-                Some(signal) = name_owner_changed.next() => {
-                    let args = signal.args()?;
-                    if args.new_owner().is_none() {
-                        watch_ref
-                            .get_mut()
-                            .await
-                            .handle_service_unregistered(
-                                &args.name().to_owned(),
-                                watch_ref.signal_context(),
-                            )
-                            .await;
-                    }
-                },
-                _ = cancel.cancelled() => break,
+        Ok(async move {
+            loop {
+                tokio::select! {
+                    Some(signal) = name_owner_changed.next() => {
+                        let args = signal.args().expect("illegal NameOwnerChanged signal");
+                        if args.new_owner().is_none() {
+                            watch_ref
+                                .get_mut()
+                                .await
+                                .handle_service_unregistered(
+                                    &args.name().to_owned(),
+                                    watch_ref.signal_context(),
+                                )
+                                .await;
+                        }
+                    },
+                    _ = OptionFuture::from(cancel.as_mut().map(|x| x.cancelled())) => break,
+                }
             }
-        }
-        Ok(())
+        })
     }
 
     pub async fn handle_service_unregistered(
@@ -96,7 +102,7 @@ impl StatusNotifierWatcher {
 }
 
 #[dbus_interface(name = "org.kde.StatusNotifierWatcher")]
-impl StatusNotifierWatcher {
+impl NotifierWatcher {
     async fn register_status_notifier_item(
         &mut self,
         service: &str,

@@ -1,0 +1,46 @@
+[package]
+name = "dbusmenu-gtk3-sys"
+version = "0.0.1"
+edition = "2021"
+build = "build.rs"
+[package.metadata.system-deps.dbusmenu_gtk3_0_4]
+name = "dbusmenu-gtk3-0.4"
+version = "0.4"
+[package.metadata.docs.rs]
+features = ["dox"]
+
+[lib]
+name = "dbusmenu_gtk3_sys"
+
+[dependencies]
+libc = "0.2"
+
+[dependencies.glib]
+package = "glib-sys"
+git = "https://github.com/gtk-rs/gtk-rs-core"
+
+[dependencies.dbusmenu]
+package = "dbusmenu-sys"
+path = "../../dbusmenu/sys"
+
+[dependencies.gdk]
+package = "gdk-sys"
+git = "https://github.com/gtk-rs/gtk3-rs"
+
+[dependencies.gdk_pixbuf]
+package = "gdk-pixbuf-sys"
+git = "https://github.com/gtk-rs/gtk-rs-core"
+
+[dependencies.gtk]
+package = "gtk-sys"
+git = "https://github.com/gtk-rs/gtk3-rs"
+
+[build-dependencies]
+system-deps = "6"
+
+[dev-dependencies]
+shell-words = "1.0.0"
+tempfile = "3"
+
+[features]
+dox = []
