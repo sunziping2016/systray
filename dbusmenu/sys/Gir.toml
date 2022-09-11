@@ -11,3 +11,19 @@ external_libraries = [
     "GLib",
     "GObject",
 ]
+
+[[object]]
+name = "Dbusmenu.Client"
+status = "generate"
+    [[object.function]]
+    name = "get_icon_paths"
+    manual = true
+[[object]]
+name = "Dbusmenu.Server"
+status = "generate"
+    [[object.function]]
+    name = "get_icon_paths"
+    manual = true
+    [[object.function]]
+    name = "set_icon_paths"
+    manual = true

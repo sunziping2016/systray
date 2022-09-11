@@ -1,105 +1,433 @@
-diff --color -ru gir-files/Dbusmenu-0.4.gir a/gir-files/Dbusmenu-0.4.gir
---- gir-files/Dbusmenu-0.4.gir	2022-09-04 00:57:09.376932139 +0800
-+++ a/gir-files/Dbusmenu-0.4.gir	2022-09-04 00:48:37.288555084 +0800
-@@ -1447,7 +1447,8 @@
+diff --color -ru gir-files/Dbusmenu-0.4.gir /usr/share/gir-1.0/Dbusmenu-0.4.gir
+--- gir-files/Dbusmenu-0.4.gir	2022-09-11 23:11:02.413586324 +0800
++++ /usr/share/gir-1.0/Dbusmenu-0.4.gir	2022-04-26 02:57:51.000000000 +0800
+@@ -1336,32 +1336,6 @@
+           </parameter>
+         </parameters>
+       </constructor>
+-      <virtual-method name="buildvariant">
+-        <source-position filename="menuitem.h" line="416"/>
+-        <return-value transfer-ownership="full">
+-          <doc xml:space="preserve"
+-               filename="menuitem.h"
+-               line="414">A variant representing this item and its children</doc>
+-          <type name="GLib.Variant" c:type="GVariant*"/>
+-        </return-value>
+-        <parameters>
+-          <instance-parameter name="mi" transfer-ownership="none">
+-            <doc xml:space="preserve"
+-                 filename="menuitem.h"
+-                 line="408">Menu item that should be built from</doc>
+-            <type name="Menuitem" c:type="DbusmenuMenuitem*"/>
+-          </instance-parameter>
+-          <parameter name="properties"
+-                     transfer-ownership="none"
+-                     nullable="1"
+-                     allow-none="1">
+-            <doc xml:space="preserve"
+-                 filename="menuitem.h"
+-                 line="409">A list of properties that should be the only ones in the resulting variant structure</doc>
+-            <type name="utf8" c:type="gchar**"/>
+-          </parameter>
+-        </parameters>
+-      </virtual-method>
+       <virtual-method name="child_added">
+         <source-position filename="menuitem.h" line="450"/>
+         <return-value transfer-ownership="none">
+@@ -1449,7 +1423,9 @@
+           </parameter>
+         </parameters>
+       </virtual-method>
+-      <virtual-method name="send_about_to_show" invoker="send_about_to_show">
++      <virtual-method name="send_about_to_show"
++                      invoker="send_about_to_show"
++                      introspectable="0">
+         <doc xml:space="preserve"
+              filename="menuitem.c"
+              line="1773">This function is used to send the even that the submenu
+@@ -1467,23 +1443,16 @@
+                  line="1775">The #DbusmenuMenuitem to send the signal on.</doc>
+             <type name="Menuitem" c:type="DbusmenuMenuitem*"/>
+           </instance-parameter>
+-          <parameter name="callback"
+-                     transfer-ownership="none"
+-                     nullable="1"
+-                     allow-none="1"
+-                     scope="async"
+-                     closure="1">
++          <parameter name="cb" transfer-ownership="none">
              <doc xml:space="preserve"
                   filename="menuitem.c"
                   line="1776">Callback to call when the call has returned.</doc>
--            <type c:type="dbusmenu_menuitem_about_to_show_cb"/>
-+            <type name="menuitem_about_to_show_cb"
-+                  c:type="dbusmenu_menuitem_about_to_show_cb"/>
+-            <type name="MenuitemAboutToShowCb"
+-                  c:type="DbusmenuMenuitemAboutToShowCb"/>
++            <type c:type="dbusmenu_menuitem_about_to_show_cb"/>
            </parameter>
-           <parameter name="cb_data"
+-          <parameter name="user_data"
++          <parameter name="cb_data"
                       transfer-ownership="none"
-@@ -2857,7 +2858,8 @@
+                      nullable="1"
+-                     allow-none="1"
+-                     closure="0">
++                     allow-none="1">
+             <doc xml:space="preserve"
+                  filename="menuitem.c"
+                  line="1777">Data to pass to the callback.</doc>
+@@ -1727,11 +1696,11 @@
+       <method name="foreach" c:identifier="dbusmenu_menuitem_foreach">
+         <doc xml:space="preserve"
+              filename="menuitem.c"
+-             line="1705">This calls the function @callback on this menu item and all
++             line="1705">This calls the function @func on this menu item and all
+ of the children of this item.  And their children.  And
+ their children.  And... you get the point.  It will get
+ called on the whole tree.</doc>
+-        <source-position filename="menuitem.h" line="523"/>
++        <source-position filename="menuitem.h" line="514"/>
+         <return-value transfer-ownership="none">
+           <type name="none" c:type="void"/>
+         </return-value>
+@@ -1742,22 +1711,19 @@
+                  line="1707">The #DbusmenItem to start from</doc>
+             <type name="Menuitem" c:type="DbusmenuMenuitem*"/>
+           </instance-parameter>
+-          <parameter name="callback"
++          <parameter name="func"
+                      transfer-ownership="none"
+                      nullable="1"
+-                     allow-none="1"
+-                     scope="call"
+-                     closure="1">
++                     allow-none="1">
+             <doc xml:space="preserve"
+                  filename="menuitem.c"
+                  line="1708">Function to call on every node in the tree</doc>
+-            <type name="MenuitemForeachCb" c:type="DbusmenuMenuitemForeachCb"/>
++            <type name="gpointer" c:type="gpointer*"/>
+           </parameter>
+-          <parameter name="user_data"
++          <parameter name="data"
+                      transfer-ownership="none"
+                      nullable="1"
+-                     allow-none="1"
+-                     closure="0">
++                     allow-none="1">
+             <doc xml:space="preserve"
+                  filename="menuitem.c"
+                  line="1709">User data to pass to the function</doc>
+@@ -1925,7 +1891,7 @@
+ If you subclass this function you should really think
+ about calling the parent function unless you have a good
+ reason not to.</doc>
+-        <source-position filename="menuitem.h" line="524"/>
++        <source-position filename="menuitem.h" line="515"/>
+         <return-value transfer-ownership="none">
+           <type name="none" c:type="void"/>
+         </return-value>
+@@ -1973,8 +1939,8 @@
+                line="1511">A brand new #GHashTable that contains all of
+    theroperties that are on this #DbusmenuMenuitem @mi.</doc>
+           <type name="GLib.HashTable" c:type="GHashTable*">
+-            <type name="utf8"/>
+-            <type name="GLib.Variant"/>
++            <type name="gpointer" c:type="gpointer"/>
++            <type name="gpointer" c:type="gpointer"/>
+           </type>
+         </return-value>
+         <parameters>
+@@ -2427,7 +2393,7 @@
+ of this item is about to be shown.  Callers to this event
+ should delay showing the menu until their callback is
+ called if possible.</doc>
+-        <source-position filename="menuitem.h" line="525"/>
++        <source-position filename="menuitem.h" line="516"/>
+         <return-value transfer-ownership="none">
+           <type name="none" c:type="void"/>
+         </return-value>
+@@ -2438,23 +2404,19 @@
+                  line="1775">The #DbusmenuMenuitem to send the signal on.</doc>
+             <type name="Menuitem" c:type="DbusmenuMenuitem*"/>
+           </instance-parameter>
+-          <parameter name="callback"
++          <parameter name="cb"
+                      transfer-ownership="none"
+                      nullable="1"
+-                     allow-none="1"
+-                     scope="async"
+-                     closure="1">
++                     allow-none="1">
+             <doc xml:space="preserve"
+                  filename="menuitem.c"
+                  line="1776">Callback to call when the call has returned.</doc>
+-            <type name="MenuitemAboutToShowCb"
+-                  c:type="DbusmenuMenuitemAboutToShowCb"/>
++            <type name="gpointer" c:type="gpointer*"/>
+           </parameter>
+-          <parameter name="user_data"
++          <parameter name="cb_data"
+                      transfer-ownership="none"
+                      nullable="1"
+-                     allow-none="1"
+-                     closure="0">
++                     allow-none="1">
+             <doc xml:space="preserve"
+                  filename="menuitem.c"
+                  line="1777">Data to pass to the callback.</doc>
+@@ -2523,7 +2485,7 @@
+              line="1802">Signals that this menu item should be shown to the user.  If this is
+ server side the server will then take it and send it over the
+ bus.</doc>
+-        <source-position filename="menuitem.h" line="527"/>
++        <source-position filename="menuitem.h" line="518"/>
+         <return-value transfer-ownership="none">
+           <type name="none" c:type="void"/>
+         </return-value>
+@@ -2635,7 +2597,7 @@
+             <doc xml:space="preserve"
+                  filename="menuitem.c"
+                  line="158">The #DbusmenuMenuitem which is the child.</doc>
+-            <type name="Menuitem"/>
++            <type name="GObject.Object"/>
+           </parameter>
+           <parameter name="arg2" transfer-ownership="none">
+             <doc xml:space="preserve"
+@@ -2658,7 +2620,7 @@
+             <doc xml:space="preserve"
+                  filename="menuitem.c"
+                  line="191">The #DbusmenuMenuitem which is the child.</doc>
+-            <type name="Menuitem"/>
++            <type name="GObject.Object"/>
+           </parameter>
+           <parameter name="arg2" transfer-ownership="none">
+             <doc xml:space="preserve"
+@@ -2689,7 +2651,7 @@
+             <doc xml:space="preserve"
+                  filename="menuitem.c"
+                  line="174">The #DbusmenuMenuitem which was the child.</doc>
+-            <type name="Menuitem"/>
++            <type name="GObject.Object"/>
+           </parameter>
+         </parameters>
+       </glib:signal>
+@@ -2792,66 +2754,6 @@
+         </parameters>
+       </glib:signal>
+     </class>
+-    <callback name="MenuitemAboutToShowCb"
+-              c:type="DbusmenuMenuitemAboutToShowCb">
+-      <doc xml:space="preserve"
+-           filename="menuitem.h"
+-           line="396">Callback prototype for a callback that is called when the
+-menu should be shown.</doc>
+-      <source-position filename="menuitem.h" line="404"/>
+-      <return-value transfer-ownership="none">
+-        <type name="none" c:type="void"/>
+-      </return-value>
+-      <parameters>
+-        <parameter name="mi" transfer-ownership="none">
+-          <doc xml:space="preserve"
+-               filename="menuitem.h"
+-               line="398">Menu item that should be shown</doc>
+-          <type name="Menuitem" c:type="DbusmenuMenuitem*"/>
+-        </parameter>
+-        <parameter name="user_data"
+-                   transfer-ownership="none"
+-                   nullable="1"
+-                   allow-none="1"
+-                   closure="1">
+-          <doc xml:space="preserve"
+-               filename="menuitem.h"
+-               line="399">Extra user data sent with the function</doc>
+-          <type name="gpointer" c:type="gpointer"/>
+-        </parameter>
+-      </parameters>
+-    </callback>
+-    <callback name="MenuitemBuildVariantSlot"
+-              c:type="DbusmenuMenuitemBuildVariantSlot">
+-      <doc xml:space="preserve"
+-           filename="menuitem.h"
+-           line="406">This is the function that is called to represent this menu item
+-as a variant.  Should call its own children.</doc>
+-      <source-position filename="menuitem.h" line="416"/>
+-      <return-value transfer-ownership="full">
+-        <doc xml:space="preserve"
+-             filename="menuitem.h"
+-             line="414">A variant representing this item and its children</doc>
+-        <type name="GLib.Variant" c:type="GVariant*"/>
+-      </return-value>
+-      <parameters>
+-        <parameter name="mi" transfer-ownership="none">
+-          <doc xml:space="preserve"
+-               filename="menuitem.h"
+-               line="408">Menu item that should be built from</doc>
+-          <type name="Menuitem" c:type="DbusmenuMenuitem*"/>
+-        </parameter>
+-        <parameter name="properties"
+-                   transfer-ownership="none"
+-                   nullable="1"
+-                   allow-none="1">
+-          <doc xml:space="preserve"
+-               filename="menuitem.h"
+-               line="409">A list of properties that should be the only ones in the resulting variant structure</doc>
+-          <type name="utf8" c:type="gchar**"/>
+-        </parameter>
+-      </parameters>
+-    </callback>
+     <record name="MenuitemClass"
+             c:type="DbusmenuMenuitemClass"
+             glib:is-gtype-struct-for="Menuitem">
+@@ -2951,12 +2853,11 @@
+           </return-value>
+         </callback>
+       </field>
+-      <field name="buildvariant">
++      <field name="buildvariant" introspectable="0">
          <doc xml:space="preserve"
               filename="menuitem.h"
               line="428">Virtual function that appends the strings required to represent this menu item in the menu variant.</doc>
--        <type c:type="dbusmenu_menuitem_buildvariant_slot_t"/>
-+        <type name="menuitem_buildvariant_slot_t"
-+              c:type="dbusmenu_menuitem_buildvariant_slot_t"/>
+-        <type name="MenuitemBuildVariantSlot"
+-              c:type="DbusmenuMenuitemBuildVariantSlot"/>
++        <type c:type="dbusmenu_menuitem_buildvariant_slot_t"/>
        </field>
        <field name="handle_event">
          <callback name="handle_event">
-@@ -2910,7 +2912,8 @@
+@@ -2992,8 +2893,8 @@
+           </parameters>
+         </callback>
+       </field>
+-      <field name="send_about_to_show">
+-        <callback name="send_about_to_show">
++      <field name="send_about_to_show" introspectable="0">
++        <callback name="send_about_to_show" introspectable="0">
+           <source-position filename="menuitem.h" line="458"/>
+           <return-value transfer-ownership="none">
+             <type name="none" c:type="void"/>
+@@ -3005,23 +2906,16 @@
+                    line="1775">The #DbusmenuMenuitem to send the signal on.</doc>
+               <type name="Menuitem" c:type="DbusmenuMenuitem*"/>
+             </parameter>
+-            <parameter name="callback"
+-                       transfer-ownership="none"
+-                       nullable="1"
+-                       allow-none="1"
+-                       scope="async"
+-                       closure="2">
++            <parameter name="cb" transfer-ownership="none">
                <doc xml:space="preserve"
                     filename="menuitem.c"
                     line="1776">Callback to call when the call has returned.</doc>
--              <type c:type="dbusmenu_menuitem_about_to_show_cb"/>
-+              <type name="menuitem_about_to_show_cb"
-+                    c:type="dbusmenu_menuitem_about_to_show_cb"/>
+-              <type name="MenuitemAboutToShowCb"
+-                    c:type="DbusmenuMenuitemAboutToShowCb"/>
++              <type c:type="dbusmenu_menuitem_about_to_show_cb"/>
              </parameter>
-             <parameter name="cb_data"
+-            <parameter name="user_data"
++            <parameter name="cb_data"
                         transfer-ownership="none"
-diff --color -ru gir-files/freetype2-2.0.gir a/gir-files/freetype2-2.0.gir
---- gir-files/freetype2-2.0.gir	2022-09-04 00:57:09.333594512 +0800
-+++ a/gir-files/freetype2-2.0.gir	2022-09-04 00:48:37.288555084 +0800
-@@ -8,9 +8,6 @@
-     <record name="Bitmap" c:type="FT_Bitmap"/>
-     <record name="Face" c:type="FT_Face"/>
-     <record name="Library" c:type="FT_Library"/>
--    <alias name="Int32" c:type="FT_Int32">
--      <type name="int32"/>
--    </alias>
-     <function name="library_version" c:identifier="FT_Library_Version">
-       <return-value transfer-ownership="none">
-         <type name="none" c:type="void"/>
-diff --color -ru gir-files/HarfBuzz-0.0.gir a/gir-files/HarfBuzz-0.0.gir
---- gir-files/HarfBuzz-0.0.gir	2022-09-04 00:57:09.393600458 +0800
-+++ a/gir-files/HarfBuzz-0.0.gir	2022-09-04 00:48:37.295222515 +0800
-@@ -13820,55 +13820,6 @@
-         <type name="var_int_t" c:type="hb_var_int_t"/>
+                        nullable="1"
+-                       allow-none="1"
+-                       closure="1">
++                       allow-none="1">
+               <doc xml:space="preserve"
+                    filename="menuitem.c"
+                    line="1777">Data to pass to the callback.</doc>
+@@ -3120,24 +3014,6 @@
+         </callback>
        </field>
      </record>
--    <function name="graphite2_face_get_gr_face"
--              c:identifier="hb_graphite2_face_get_gr_face"
--              version="0.9.10"
--              introspectable="0">
--      <doc xml:space="preserve"
--           filename="../src/hb-graphite2.cc"
--           line="160">Fetches the Graphite2 gr_face corresponding to the specified
--#hb_face_t face object.</doc>
--      <source-position filename="../src/hb-graphite2.h" line="48"/>
--      <return-value>
--        <doc xml:space="preserve"
--             filename="../src/hb-graphite2.cc"
--             line="167">the gr_face found</doc>
--        <type c:type="gr_face*"/>
+-    <callback name="MenuitemForeachCb" c:type="DbusmenuMenuitemForeachCb">
+-      <source-position filename="menuitem.h" line="521"/>
+-      <return-value transfer-ownership="none">
+-        <type name="none" c:type="void"/>
 -      </return-value>
 -      <parameters>
--        <parameter name="face" transfer-ownership="none">
--          <doc xml:space="preserve"
--               filename="../src/hb-graphite2.cc"
--               line="162">@hb_face_t to query</doc>
--          <type name="face_t" c:type="hb_face_t*"/>
+-        <parameter name="mi" transfer-ownership="none">
+-          <type name="Menuitem" c:type="DbusmenuMenuitem*"/>
+-        </parameter>
+-        <parameter name="user_data"
+-                   transfer-ownership="none"
+-                   nullable="1"
+-                   allow-none="1"
+-                   closure="1">
+-          <type name="gpointer" c:type="gpointer"/>
 -        </parameter>
 -      </parameters>
--    </function>
--    <function name="graphite2_font_get_gr_font"
--              c:identifier="hb_graphite2_font_get_gr_font"
--              version="0.9.10"
--              introspectable="0"
--              deprecated="1"
--              deprecated-version="1.4.2">
--      <doc xml:space="preserve"
--           filename="../src/hb-graphite2.cc"
--           line="197">Always returns `NULL`. Use hb_graphite2_face_get_gr_face() instead.</doc>
--      <source-position filename="../src/hb-graphite2.h" line="53"/>
--      <return-value nullable="1">
--        <doc xml:space="preserve"
--             filename="../src/hb-graphite2.cc"
--             line="203">Graphite2 font associated with @font.</doc>
--        <type c:type="gr_font*"/>
--      </return-value>
--      <parameters>
--        <parameter name="font" transfer-ownership="none">
--          <doc xml:space="preserve"
--               filename="../src/hb-graphite2.cc"
--               line="199">An #hb_font_t</doc>
--          <type name="font_t" c:type="hb_font_t*"/>
--        </parameter>
--      </parameters>
--    </function>
-     <docsection name="hb-aat-layout">
+-    </callback>
+     <record name="MenuitemPrivate"
+             c:type="DbusmenuMenuitemPrivate"
+             disguised="1">
+@@ -3867,7 +3743,7 @@
+     <docsection name="menuitem">
        <doc xml:space="preserve"
-            filename="../src/hb-aat-layout.cc"
+            filename="menuitem.h"
+-           line="529">A #DbusmenuMenuitem is the lowest level of represenation of a
++           line="520">A #DbusmenuMenuitem is the lowest level of represenation of a
+ single item in a menu.  It gets created on the server side
+ and copied over to the client side where it gets rendered.  As
+ the server starts to change it, and grow it, and do all kinds
+@@ -3886,6 +3762,66 @@
+ menuitem to a new object that can be moved around appropriately within
+ the new menu structure.</doc>
+     </docsection>
++    <callback name="menuitem_about_to_show_cb"
++              c:type="dbusmenu_menuitem_about_to_show_cb">
++      <doc xml:space="preserve"
++           filename="menuitem.h"
++           line="396">Callback prototype for a callback that is called when the
++menu should be shown.</doc>
++      <source-position filename="menuitem.h" line="404"/>
++      <return-value transfer-ownership="none">
++        <type name="none" c:type="void"/>
++      </return-value>
++      <parameters>
++        <parameter name="mi" transfer-ownership="none">
++          <doc xml:space="preserve"
++               filename="menuitem.h"
++               line="398">Menu item that should be shown</doc>
++          <type name="Menuitem" c:type="DbusmenuMenuitem*"/>
++        </parameter>
++        <parameter name="user_data"
++                   transfer-ownership="none"
++                   nullable="1"
++                   allow-none="1"
++                   closure="1">
++          <doc xml:space="preserve"
++               filename="menuitem.h"
++               line="399">Extra user data sent with the function</doc>
++          <type name="gpointer" c:type="gpointer"/>
++        </parameter>
++      </parameters>
++    </callback>
++    <callback name="menuitem_buildvariant_slot_t"
++              c:type="dbusmenu_menuitem_buildvariant_slot_t">
++      <doc xml:space="preserve"
++           filename="menuitem.h"
++           line="406">This is the function that is called to represent this menu item
++as a variant.  Should call its own children.</doc>
++      <source-position filename="menuitem.h" line="416"/>
++      <return-value transfer-ownership="full">
++        <doc xml:space="preserve"
++             filename="menuitem.h"
++             line="414">A variant representing this item and its children</doc>
++        <type name="GLib.Variant" c:type="GVariant*"/>
++      </return-value>
++      <parameters>
++        <parameter name="mi" transfer-ownership="none">
++          <doc xml:space="preserve"
++               filename="menuitem.h"
++               line="408">Menu item that should be built from</doc>
++          <type name="Menuitem" c:type="DbusmenuMenuitem*"/>
++        </parameter>
++        <parameter name="properties"
++                   transfer-ownership="none"
++                   nullable="1"
++                   allow-none="1">
++          <doc xml:space="preserve"
++               filename="menuitem.h"
++               line="409">A list of properties that should be the only ones in the resulting variant structure</doc>
++          <type name="utf8" c:type="gchar**"/>
++        </parameter>
++      </parameters>
++    </callback>
+     <docsection name="server">
+       <doc xml:space="preserve"
+            filename="server.h"

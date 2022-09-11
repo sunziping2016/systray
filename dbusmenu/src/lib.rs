@@ -11,7 +11,9 @@ macro_rules! assert_initialized_main_thread {
     };
 }
 
+#[allow(unused_imports)]
 mod auto;
+mod client;
 mod menuitem;
 pub mod prelude;
 

@@ -12,28 +12,29 @@ deprecate_by_min_version = true
 single_version_file = true
 
 generate = [
-    # "Dbusmenu.Client",
     # "Dbusmenu.Server",
 ]
 
 [[object]]
 name = "Dbusmenu.Menuitem"
 status = "generate"
+manual_traits = ["MenuitemExtManual"]
     [[object.function]]
-    name = "property_set_byte_array"
+    pattern = "property_(set_byte_array|get_variant|set_variant)|handle_event|properties_copy"
+    ignore = true
+    doc_trait_name = "MenuitemExtManual"
+    [[object.signal]]
+    pattern = "event|property-changed"
+    ignore = true
+    doc_trait_name = "MenuitemExtManual"
+[[object]]
+name = "Dbusmenu.Client"
+# status = "generate"
+manual_traits = ["ClientExtManual"]
+    [[object.function]]
+    name = "add_type_handler"
     ignore = true
     [[object.signal]]
-    name = "child-added"
+    name = "event-result"
     ignore = true
-    [[object.signal]]
-    name = "child-moved"
-    ignore = true
-    [[object.signal]]
-    name = "child-removed"
-    ignore = true
-    [[object.signal]]
-    name = "event"
-    ignore = true
-    [[object.signal]]
-    name = "property-changed"
-    ignore = true
+    doc_trait_name = "ClientExtManual"

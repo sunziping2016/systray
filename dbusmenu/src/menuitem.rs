@@ -1,9 +1,10 @@
-use std::mem::transmute;
+use std::{collections::HashMap, mem::transmute};
 
 use glib::{
     signal::connect_raw,
     translate::{
-        from_glib, from_glib_borrow, FromGlibPtrBorrow, FromGlibPtrNone, IntoGlib, ToGlibPtr,
+        from_glib, from_glib_borrow, from_glib_full, from_glib_none, FromGlibPtrBorrow,
+        FromGlibPtrNone, IntoGlib, ToGlibPtr,
     },
     Cast, IsA, SignalHandlerId,
 };
@@ -13,19 +14,15 @@ use crate::Menuitem;
 pub trait MenuitemExtManual: 'static {
     #[doc(alias = "dbusmenu_menuitem_property_set_byte_array")]
     fn property_set_byte_array(&self, property: &str, value: &[u8]) -> bool;
-    #[doc(alias = "child-removed")]
-    fn connect_child_added<F: Fn(&Self, &glib::Object, u32) + 'static>(
-        &self,
-        f: F,
-    ) -> SignalHandlerId;
-    #[doc(alias = "child-moved")]
-    fn connect_child_moved<F: Fn(&Self, &glib::Object, u32, u32) + 'static>(
-        &self,
-        f: F,
-    ) -> SignalHandlerId;
-    #[doc(alias = "child-removed")]
-    fn connect_child_removed<F: Fn(&Self, &glib::Object) + 'static>(&self, f: F)
-        -> SignalHandlerId;
+
+    #[doc(alias = "dbusmenu_menuitem_property_get_variant")]
+    fn property_get_variant(&self, property: &str) -> Option<glib::Variant>;
+
+    #[doc(alias = "dbusmenu_menuitem_property_set_variant")]
+    fn property_set_variant(&self, property: &str, value: &glib::Variant) -> bool;
+
+    #[doc(alias = "dbusmenu_menuitem_properties_copy")]
+    fn properties_copy(&self) -> HashMap<String, Option<glib::Variant>>;
 
     #[doc(alias = "event")]
     fn connect_event<F: Fn(&Self, &str, &glib::Variant, u32) -> bool + 'static>(
@@ -39,6 +36,9 @@ pub trait MenuitemExtManual: 'static {
         &self,
         f: F,
     ) -> SignalHandlerId;
+
+    #[doc(alias = "dbusmenu_menuitem_handle_event")]
+    fn handle_event(&self, name: &str, variant: &glib::Variant, timestamp: u32);
 }
 
 impl<O: IsA<Menuitem>> MenuitemExtManual for O {
@@ -53,102 +53,46 @@ impl<O: IsA<Menuitem>> MenuitemExtManual for O {
         }
     }
 
-    fn connect_child_added<F: Fn(&Self, &glib::Object, u32) + 'static>(
-        &self,
-        f: F,
-    ) -> SignalHandlerId {
-        unsafe extern "C" fn child_added_trampoline<
-            P: IsA<Menuitem>,
-            F: Fn(&P, &glib::Object, u32) + 'static,
-        >(
-            this: *mut ffi::DbusmenuMenuitem,
-            arg1: *mut glib::object::GObject,
-            arg2: libc::c_uint,
-            f: glib::ffi::gpointer,
-        ) {
-            let f: &F = &*(f as *const F);
-            f(
-                Menuitem::from_glib_borrow(this).unsafe_cast_ref(),
-                &from_glib_borrow(arg1),
-                arg2,
-            )
-        }
-        let f = Box::new(f);
+    fn property_get_variant(&self, property: &str) -> Option<glib::Variant> {
         unsafe {
-            connect_raw(
-                self.as_ptr() as *mut _,
-                b"child-added\0".as_ptr() as *const _,
-                Some(transmute::<_, unsafe extern "C" fn()>(
-                    child_added_trampoline::<Self, F> as *const (),
-                )),
-                Box::into_raw(f),
-            )
+            from_glib_none(ffi::dbusmenu_menuitem_property_get_variant(
+                self.as_ref().to_glib_none().0,
+                property.to_glib_none().0,
+            ))
         }
     }
 
-    fn connect_child_moved<F: Fn(&Self, &glib::Object, u32, u32) + 'static>(
-        &self,
-        f: F,
-    ) -> SignalHandlerId {
-        unsafe extern "C" fn child_moved_trampoline<
-            P: IsA<Menuitem>,
-            F: Fn(&P, &glib::Object, u32, u32) + 'static,
-        >(
-            this: *mut ffi::DbusmenuMenuitem,
-            arg1: *mut glib::object::GObject,
-            arg2: libc::c_uint,
-            arg3: libc::c_uint,
-            f: glib::ffi::gpointer,
-        ) {
-            let f: &F = &*(f as *const F);
-            f(
-                Menuitem::from_glib_borrow(this).unsafe_cast_ref(),
-                &from_glib_borrow(arg1),
-                arg2,
-                arg3,
-            )
-        }
-        let f = Box::new(f);
+    fn property_set_variant(&self, property: &str, value: &glib::Variant) -> bool {
         unsafe {
-            connect_raw(
-                self.as_ptr() as *mut _,
-                b"child-moved\0".as_ptr() as *const _,
-                Some(transmute::<_, unsafe extern "C" fn()>(
-                    child_moved_trampoline::<Self, F> as *const (),
-                )),
-                Box::into_raw(f),
-            )
+            from_glib(ffi::dbusmenu_menuitem_property_set_variant(
+                self.as_ref().to_glib_none().0,
+                property.to_glib_none().0,
+                value as *const _ as *mut _,
+            ))
         }
     }
 
-    fn connect_child_removed<F: Fn(&Self, &glib::Object) + 'static>(
-        &self,
-        f: F,
-    ) -> SignalHandlerId {
-        unsafe extern "C" fn child_added_trampoline<
-            P: IsA<Menuitem>,
-            F: Fn(&P, &glib::Object) + 'static,
-        >(
-            this: *mut ffi::DbusmenuMenuitem,
-            arg1: *mut glib::object::GObject,
-            f: glib::ffi::gpointer,
-        ) {
-            let f: &F = &*(f as *const F);
-            f(
-                Menuitem::from_glib_borrow(this).unsafe_cast_ref(),
-                &from_glib_borrow(arg1),
-            )
+    fn properties_copy(&self) -> HashMap<String, Option<glib::Variant>> {
+        unsafe extern "C" fn copy_trampoline(
+            key: glib::ffi::gpointer,
+            value: glib::ffi::gpointer,
+            user_data: glib::ffi::gpointer,
+        ) -> glib::ffi::gboolean {
+            let hash_map = &mut *(user_data as *mut HashMap<String, Option<glib::Variant>>);
+            let key = from_glib_full(key as *const libc::c_char);
+            let value = from_glib_full(value as *mut glib::ffi::GVariant);
+            hash_map.insert(key, value);
+            glib::ffi::GTRUE
         }
-        let f = Box::new(f);
         unsafe {
-            connect_raw(
-                self.as_ptr() as *mut _,
-                b"child-removed\0".as_ptr() as *const _,
-                Some(transmute::<_, unsafe extern "C" fn()>(
-                    child_added_trampoline::<Self, F> as *const (),
-                )),
-                Box::into_raw(f),
-            )
+            let hash_table = ffi::dbusmenu_menuitem_properties_copy(self.as_ref().to_glib_none().0);
+            let mut map = HashMap::new();
+            glib::ffi::g_hash_table_foreach_steal(
+                hash_table,
+                Some(copy_trampoline),
+                &mut map as *mut _ as *mut _,
+            );
+            map
         }
     }
 
@@ -217,11 +161,22 @@ impl<O: IsA<Menuitem>> MenuitemExtManual for O {
         unsafe {
             connect_raw(
                 self.as_ptr() as *mut _,
-                b"property-changed".as_ptr() as *const _,
+                b"property-changed\0".as_ptr() as *const _,
                 Some(transmute::<_, unsafe extern "C" fn()>(
                     property_changed_trampoline::<Self, F> as *const (),
                 )),
                 Box::into_raw(f),
+            )
+        }
+    }
+
+    fn handle_event(&self, name: &str, variant: &glib::Variant, timestamp: u32) {
+        unsafe {
+            ffi::dbusmenu_menuitem_handle_event(
+                self.as_ref().to_glib_none().0,
+                name.to_glib_none().0,
+                variant.to_glib_none().0,
+                timestamp,
             )
         }
     }

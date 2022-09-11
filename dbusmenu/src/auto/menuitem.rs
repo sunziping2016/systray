@@ -73,8 +73,8 @@ pub trait MenuitemExt: 'static {
 #[must_use]
     fn find_id(&self, id: i32) -> Option<Menuitem>;
 
-    //#[doc(alias = "dbusmenu_menuitem_foreach")]
-    //fn foreach(&self, func: /*Unimplemented*/Option<Basic: Pointer>, data: /*Unimplemented*/Option<Basic: Pointer>);
+    #[doc(alias = "dbusmenu_menuitem_foreach")]
+    fn foreach(&self, callback: Option<&mut dyn (FnMut(&Menuitem))>);
 
     #[doc(alias = "dbusmenu_menuitem_get_children")]
     #[doc(alias = "get_children")]
@@ -101,12 +101,6 @@ pub trait MenuitemExt: 'static {
     #[doc(alias = "get_root")]
     fn is_root(&self) -> bool;
 
-    //#[doc(alias = "dbusmenu_menuitem_handle_event")]
-    //fn handle_event(&self, name: &str, variant: /*Ignored*/&glib::Variant, timestamp: u32);
-
-    //#[doc(alias = "dbusmenu_menuitem_properties_copy")]
-    //fn properties_copy(&self) -> /*Unknown conversion*//*Unimplemented*/HashTable TypeId { ns_id: 0, id: 25 }/TypeId { ns_id: 0, id: 25 };
-
     #[doc(alias = "dbusmenu_menuitem_properties_list")]
     fn properties_list(&self) -> Vec<glib::GString>;
 
@@ -125,9 +119,6 @@ pub trait MenuitemExt: 'static {
     #[doc(alias = "dbusmenu_menuitem_property_get_int")]
     fn property_get_int(&self, property: &str) -> i32;
 
-    //#[doc(alias = "dbusmenu_menuitem_property_get_variant")]
-    //fn property_get_variant(&self, property: &str) -> /*Ignored*/Option<glib::Variant>;
-
     #[doc(alias = "dbusmenu_menuitem_property_remove")]
     fn property_remove(&self, property: &str);
 
@@ -140,11 +131,8 @@ pub trait MenuitemExt: 'static {
     #[doc(alias = "dbusmenu_menuitem_property_set_int")]
     fn property_set_int(&self, property: &str, value: i32) -> bool;
 
-    //#[doc(alias = "dbusmenu_menuitem_property_set_variant")]
-    //fn property_set_variant(&self, property: &str, value: /*Ignored*/&glib::Variant) -> bool;
-
-    //#[doc(alias = "dbusmenu_menuitem_send_about_to_show")]
-    //fn send_about_to_show(&self, cb: /*Unimplemented*/Option<Basic: Pointer>, cb_data: /*Unimplemented*/Option<Basic: Pointer>);
+    #[doc(alias = "dbusmenu_menuitem_send_about_to_show")]
+    fn send_about_to_show(&self, callback: Option<Box_<dyn FnOnce(&Menuitem) + 'static>>);
 
     #[doc(alias = "dbusmenu_menuitem_set_parent")]
     fn set_parent(&self, parent: &impl IsA<Menuitem>) -> bool;
@@ -163,6 +151,15 @@ pub trait MenuitemExt: 'static {
 
     #[doc(alias = "about-to-show")]
     fn connect_about_to_show<F: Fn(&Self) -> bool + 'static>(&self, f: F) -> SignalHandlerId;
+
+    #[doc(alias = "child-added")]
+    fn connect_child_added<F: Fn(&Self, &Menuitem, u32) + 'static>(&self, f: F) -> SignalHandlerId;
+
+    #[doc(alias = "child-moved")]
+    fn connect_child_moved<F: Fn(&Self, &Menuitem, u32, u32) + 'static>(&self, f: F) -> SignalHandlerId;
+
+    #[doc(alias = "child-removed")]
+    fn connect_child_removed<F: Fn(&Self, &Menuitem) + 'static>(&self, f: F) -> SignalHandlerId;
 
     #[doc(alias = "item-activated")]
     fn connect_item_activated<F: Fn(&Self, u32) + 'static>(&self, f: F) -> SignalHandlerId;
@@ -217,9 +214,23 @@ impl<O: IsA<Menuitem>> MenuitemExt for O {
         }
     }
 
-    //fn foreach(&self, func: /*Unimplemented*/Option<Basic: Pointer>, data: /*Unimplemented*/Option<Basic: Pointer>) {
-    //    unsafe { TODO: call ffi:dbusmenu_menuitem_foreach() }
-    //}
+    fn foreach(&self, callback: Option<&mut dyn (FnMut(&Menuitem))>) {
+        let callback_data: Option<&mut dyn (FnMut(&Menuitem))> = callback;
+        unsafe extern "C" fn callback_func(mi: *mut ffi::DbusmenuMenuitem, user_data: glib::ffi::gpointer) {
+            let mi = from_glib_borrow(mi);
+            let callback: *mut Option<&mut dyn (FnMut(&Menuitem))> = user_data as *const _ as usize as *mut Option<&mut dyn (FnMut(&Menuitem))>;
+            if let Some(ref mut callback) = *callback {
+                callback(&mi)
+            } else {
+                panic!("cannot get closure...")
+            };
+        }
+        let callback = if callback_data.is_some() { Some(callback_func as _) } else { None };
+        let super_callback0: &Option<&mut dyn (FnMut(&Menuitem))> = &callback_data;
+        unsafe {
+            ffi::dbusmenu_menuitem_foreach(self.as_ref().to_glib_none().0, callback, super_callback0 as *const _ as usize as *mut _);
+        }
+    }
 
     fn children(&self) -> Vec<Menuitem> {
         unsafe {
@@ -256,14 +267,6 @@ impl<O: IsA<Menuitem>> MenuitemExt for O {
             from_glib(ffi::dbusmenu_menuitem_get_root(self.as_ref().to_glib_none().0))
         }
     }
-
-    //fn handle_event(&self, name: &str, variant: /*Ignored*/&glib::Variant, timestamp: u32) {
-    //    unsafe { TODO: call ffi:dbusmenu_menuitem_handle_event() }
-    //}
-
-    //fn properties_copy(&self) -> /*Unknown conversion*//*Unimplemented*/HashTable TypeId { ns_id: 0, id: 25 }/TypeId { ns_id: 0, id: 25 } {
-    //    unsafe { TODO: call ffi:dbusmenu_menuitem_properties_copy() }
-    //}
 
     fn properties_list(&self) -> Vec<glib::GString> {
         unsafe {
@@ -303,10 +306,6 @@ impl<O: IsA<Menuitem>> MenuitemExt for O {
         }
     }
 
-    //fn property_get_variant(&self, property: &str) -> /*Ignored*/Option<glib::Variant> {
-    //    unsafe { TODO: call ffi:dbusmenu_menuitem_property_get_variant() }
-    //}
-
     fn property_remove(&self, property: &str) {
         unsafe {
             ffi::dbusmenu_menuitem_property_remove(self.as_ref().to_glib_none().0, property.to_glib_none().0);
@@ -331,13 +330,20 @@ impl<O: IsA<Menuitem>> MenuitemExt for O {
         }
     }
 
-    //fn property_set_variant(&self, property: &str, value: /*Ignored*/&glib::Variant) -> bool {
-    //    unsafe { TODO: call ffi:dbusmenu_menuitem_property_set_variant() }
-    //}
-
-    //fn send_about_to_show(&self, cb: /*Unimplemented*/Option<Basic: Pointer>, cb_data: /*Unimplemented*/Option<Basic: Pointer>) {
-    //    unsafe { TODO: call ffi:dbusmenu_menuitem_send_about_to_show() }
-    //}
+    fn send_about_to_show(&self, callback: Option<Box_<dyn FnOnce(&Menuitem) + 'static>>) {
+        let callback_data: Box_<Option<Box_<dyn FnOnce(&Menuitem) + 'static>>> = Box_::new(callback);
+        unsafe extern "C" fn callback_func(mi: *mut ffi::DbusmenuMenuitem, user_data: glib::ffi::gpointer) {
+            let mi = from_glib_borrow(mi);
+            let callback: Box_<Option<Box_<dyn FnOnce(&Menuitem) + 'static>>> = Box_::from_raw(user_data as *mut _);
+            let callback = (*callback).expect("cannot get closure...");
+            callback(&mi)
+        }
+        let callback = if callback_data.is_some() { Some(callback_func as _) } else { None };
+        let super_callback0: Box_<Option<Box_<dyn FnOnce(&Menuitem) + 'static>>> = callback_data;
+        unsafe {
+            ffi::dbusmenu_menuitem_send_about_to_show(self.as_ref().to_glib_none().0, callback, Box_::into_raw(super_callback0) as *mut _);
+        }
+    }
 
     fn set_parent(&self, parent: &impl IsA<Menuitem>) -> bool {
         unsafe {
@@ -378,6 +384,42 @@ impl<O: IsA<Menuitem>> MenuitemExt for O {
             let f: Box_<F> = Box_::new(f);
             connect_raw(self.as_ptr() as *mut _, b"about-to-show\0".as_ptr() as *const _,
                 Some(transmute::<_, unsafe extern "C" fn()>(about_to_show_trampoline::<Self, F> as *const ())), Box_::into_raw(f))
+        }
+    }
+
+    fn connect_child_added<F: Fn(&Self, &Menuitem, u32) + 'static>(&self, f: F) -> SignalHandlerId {
+        unsafe extern "C" fn child_added_trampoline<P: IsA<Menuitem>, F: Fn(&P, &Menuitem, u32) + 'static>(this: *mut ffi::DbusmenuMenuitem, arg1: *mut ffi::DbusmenuMenuitem, arg2: libc::c_uint, f: glib::ffi::gpointer) {
+            let f: &F = &*(f as *const F);
+            f(Menuitem::from_glib_borrow(this).unsafe_cast_ref(), &from_glib_borrow(arg1), arg2)
+        }
+        unsafe {
+            let f: Box_<F> = Box_::new(f);
+            connect_raw(self.as_ptr() as *mut _, b"child-added\0".as_ptr() as *const _,
+                Some(transmute::<_, unsafe extern "C" fn()>(child_added_trampoline::<Self, F> as *const ())), Box_::into_raw(f))
+        }
+    }
+
+    fn connect_child_moved<F: Fn(&Self, &Menuitem, u32, u32) + 'static>(&self, f: F) -> SignalHandlerId {
+        unsafe extern "C" fn child_moved_trampoline<P: IsA<Menuitem>, F: Fn(&P, &Menuitem, u32, u32) + 'static>(this: *mut ffi::DbusmenuMenuitem, arg1: *mut ffi::DbusmenuMenuitem, arg2: libc::c_uint, arg3: libc::c_uint, f: glib::ffi::gpointer) {
+            let f: &F = &*(f as *const F);
+            f(Menuitem::from_glib_borrow(this).unsafe_cast_ref(), &from_glib_borrow(arg1), arg2, arg3)
+        }
+        unsafe {
+            let f: Box_<F> = Box_::new(f);
+            connect_raw(self.as_ptr() as *mut _, b"child-moved\0".as_ptr() as *const _,
+                Some(transmute::<_, unsafe extern "C" fn()>(child_moved_trampoline::<Self, F> as *const ())), Box_::into_raw(f))
+        }
+    }
+
+    fn connect_child_removed<F: Fn(&Self, &Menuitem) + 'static>(&self, f: F) -> SignalHandlerId {
+        unsafe extern "C" fn child_removed_trampoline<P: IsA<Menuitem>, F: Fn(&P, &Menuitem) + 'static>(this: *mut ffi::DbusmenuMenuitem, arg1: *mut ffi::DbusmenuMenuitem, f: glib::ffi::gpointer) {
+            let f: &F = &*(f as *const F);
+            f(Menuitem::from_glib_borrow(this).unsafe_cast_ref(), &from_glib_borrow(arg1))
+        }
+        unsafe {
+            let f: Box_<F> = Box_::new(f);
+            connect_raw(self.as_ptr() as *mut _, b"child-removed\0".as_ptr() as *const _,
+                Some(transmute::<_, unsafe extern "C" fn()>(child_removed_trampoline::<Self, F> as *const ())), Box_::into_raw(f))
         }
     }
 
