@@ -1,0 +1,17 @@
+[options]
+work_mode = "normal"
+library = "DbusmenuGtk3"
+version="0.4"
+target_path = "."
+min_cfg_version="0.4"
+
+girs_directories = ["../gir-files/"]
+
+generate_safety_asserts = true
+deprecate_by_min_version = true
+single_version_file = true
+
+generate = [
+    "DbusmenuGtk3.Client",
+    "DbusmenuGtk3.Menu",
+]

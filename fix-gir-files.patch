@@ -584,3 +584,75 @@ diff --color -ru gir-files/Dbusmenu-0.4.gir /usr/share/gir-1.0/Dbusmenu-0.4.gir
      <docsection name="server">
        <doc xml:space="preserve"
             filename="server.h"
+diff --color -ru gir-files/freetype2-2.0.gir /usr/share/gir-1.0/freetype2-2.0.gir
+--- gir-files/freetype2-2.0.gir	2022-09-13 01:56:57.354163954 +0800
++++ /usr/share/gir-1.0/freetype2-2.0.gir	2022-03-18 21:02:57.000000000 +0800
+@@ -8,6 +8,9 @@
+     <record name="Bitmap" c:type="FT_Bitmap"/>
+     <record name="Face" c:type="FT_Face"/>
+     <record name="Library" c:type="FT_Library"/>
++    <alias name="Int32" c:type="FT_Int32">
++      <type name="int32"/>
++    </alias>
+     <function name="library_version" c:identifier="FT_Library_Version">
+       <return-value transfer-ownership="none">
+         <type name="none" c:type="void"/>
+diff --color -ru gir-files/HarfBuzz-0.0.gir /usr/share/gir-1.0/HarfBuzz-0.0.gir
+--- gir-files/HarfBuzz-0.0.gir	2022-09-13 02:00:18.154228306 +0800
++++ /usr/share/gir-1.0/HarfBuzz-0.0.gir	2022-07-31 22:19:28.000000000 +0800
+@@ -13820,6 +13820,55 @@
+         <type name="var_int_t" c:type="hb_var_int_t"/>
+       </field>
+     </record>
++    <function name="graphite2_face_get_gr_face"
++              c:identifier="hb_graphite2_face_get_gr_face"
++              version="0.9.10"
++              introspectable="0">
++      <doc xml:space="preserve"
++           filename="../src/hb-graphite2.cc"
++           line="160">Fetches the Graphite2 gr_face corresponding to the specified
++#hb_face_t face object.</doc>
++      <source-position filename="../src/hb-graphite2.h" line="48"/>
++      <return-value>
++        <doc xml:space="preserve"
++             filename="../src/hb-graphite2.cc"
++             line="167">the gr_face found</doc>
++        <type c:type="gr_face*"/>
++      </return-value>
++      <parameters>
++        <parameter name="face" transfer-ownership="none">
++          <doc xml:space="preserve"
++               filename="../src/hb-graphite2.cc"
++               line="162">@hb_face_t to query</doc>
++          <type name="face_t" c:type="hb_face_t*"/>
++        </parameter>
++      </parameters>
++    </function>
++    <function name="graphite2_font_get_gr_font"
++              c:identifier="hb_graphite2_font_get_gr_font"
++              version="0.9.10"
++              introspectable="0"
++              deprecated="1"
++              deprecated-version="1.4.2">
++      <doc xml:space="preserve"
++           filename="../src/hb-graphite2.cc"
++           line="197">Always returns `NULL`. Use hb_graphite2_face_get_gr_face() instead.</doc>
++      <source-position filename="../src/hb-graphite2.h" line="53"/>
++      <return-value nullable="1">
++        <doc xml:space="preserve"
++             filename="../src/hb-graphite2.cc"
++             line="203">Graphite2 font associated with @font.</doc>
++        <type c:type="gr_font*"/>
++      </return-value>
++      <parameters>
++        <parameter name="font" transfer-ownership="none">
++          <doc xml:space="preserve"
++               filename="../src/hb-graphite2.cc"
++               line="199">An #hb_font_t</doc>
++          <type name="font_t" c:type="hb_font_t*"/>
++        </parameter>
++      </parameters>
++    </function>
+     <docsection name="hb-aat-layout">
+       <doc xml:space="preserve"
+            filename="../src/hb-aat-layout.cc"
