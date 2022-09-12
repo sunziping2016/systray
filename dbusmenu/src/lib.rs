@@ -16,6 +16,7 @@ mod auto;
 mod client;
 mod menuitem;
 pub mod prelude;
+mod server;
 
 pub use auto::*;
 pub use ffi;

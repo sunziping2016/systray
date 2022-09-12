@@ -3,47 +3,16 @@ use std::mem::transmute;
 use glib::{
     signal::connect_raw,
     translate::{
-        from_glib, from_glib_borrow, FromGlib, FromGlibPtrArrayContainerAsVec, FromGlibPtrBorrow,
+        from_glib, from_glib_borrow, FromGlibPtrArrayContainerAsVec, FromGlibPtrBorrow,
         FromGlibPtrNone, ToGlibPtr,
     },
     Cast, IsA, SignalHandlerId,
 };
 
-use crate::{Client, Menuitem};
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum Status {
-    Normal,
-    Notice,
-}
-
-impl FromGlib<ffi::DbusmenuStatus> for Status {
-    unsafe fn from_glib(val: ffi::DbusmenuStatus) -> Self {
-        match val {
-            ffi::DBUSMENU_STATUS_NORMAL => Self::Normal,
-            ffi::DBUSMENU_STATUS_NOTICE => Self::Notice,
-            _ => panic!("illegal DbusmenuStatus"),
-        }
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum TextDirection {
-    None,
-    LTR,
-    RTL,
-}
-
-impl FromGlib<ffi::DbusmenuTextDirection> for TextDirection {
-    unsafe fn from_glib(val: ffi::DbusmenuTextDirection) -> Self {
-        match val {
-            ffi::DBUSMENU_TEXT_DIRECTION_NONE => Self::None,
-            ffi::DBUSMENU_TEXT_DIRECTION_LTR => Self::LTR,
-            ffi::DBUSMENU_TEXT_DIRECTION_RTL => Self::RTL,
-            _ => panic!("illegal DbusmenuStatus"),
-        }
-    }
-}
+use crate::{
+    prelude::{Status, TextDirection},
+    Client, Menuitem,
+};
 
 pub trait ClientExtManual: 'static {
     #[doc(alias = "dbusmenu_client_get_status")]

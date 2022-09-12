@@ -8,8 +8,12 @@ pub use self::client::Client;
 mod menuitem;
 pub use self::menuitem::Menuitem;
 
+mod server;
+pub use self::server::Server;
+
 #[doc(hidden)]
 pub mod traits {
     pub use super::client::ClientExt;
     pub use super::menuitem::MenuitemExt;
+    pub use super::server::ServerExt;
 }

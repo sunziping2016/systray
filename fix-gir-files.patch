@@ -1,5 +1,5 @@
 diff --color -ru gir-files/Dbusmenu-0.4.gir /usr/share/gir-1.0/Dbusmenu-0.4.gir
---- gir-files/Dbusmenu-0.4.gir	2022-09-13 00:58:42.633712778 +0800
+--- gir-files/Dbusmenu-0.4.gir	2022-09-13 01:39:16.189520923 +0800
 +++ /usr/share/gir-1.0/Dbusmenu-0.4.gir	2022-04-26 02:57:51.000000000 +0800
 @@ -458,43 +458,27 @@
          <type name="ClientPrivate" c:type="DbusmenuClientPrivate*"/>
@@ -455,7 +455,60 @@ diff --color -ru gir-files/Dbusmenu-0.4.gir /usr/share/gir-1.0/Dbusmenu-0.4.gir
      <record name="MenuitemPrivate"
              c:type="DbusmenuMenuitemPrivate"
              disguised="1">
-@@ -3882,7 +3743,7 @@
+@@ -3646,48 +3507,27 @@
+         </parameters>
+       </glib:signal>
+       <glib:signal name="item-property-updated" when="last">
+-        <doc xml:space="preserve"
+-             filename="server.c"
+-             line="238">This signal is emitted when a menuitem updates or
+-		adds a property.</doc>
+         <return-value transfer-ownership="none">
+           <type name="none" c:type="void"/>
+         </return-value>
+         <parameters>
+-          <parameter name="arg1" transfer-ownership="none">
+-            <doc xml:space="preserve"
+-                 filename="server.c"
+-                 line="241">The ID of the #DbusmenuMenuitem changing a property.</doc>
++          <parameter name="object" transfer-ownership="none">
+             <type name="gint" c:type="gint"/>
+           </parameter>
+-          <parameter name="arg2" transfer-ownership="none">
+-            <doc xml:space="preserve"
+-                 filename="server.c"
+-                 line="242">The property being changed.</doc>
++          <parameter name="p0" transfer-ownership="none">
+             <type name="utf8" c:type="gchar*"/>
+           </parameter>
+-          <parameter name="arg3" transfer-ownership="none">
+-            <doc xml:space="preserve"
+-                 filename="server.c"
+-                 line="243">The value of the property being changed.</doc>
++          <parameter name="p1" transfer-ownership="none">
+             <type name="GLib.Variant"/>
+           </parameter>
+         </parameters>
+       </glib:signal>
+       <glib:signal name="item-updated" when="last">
+-        <doc xml:space="preserve"
+-             filename="server.c"
+-             line="255">The purpose of this signal is to show major change in
+-		a menuitem to the point that #DbusmenuServer::id-prop-update
+-		seems a little insubstantive.</doc>
+         <return-value transfer-ownership="none">
+           <type name="none" c:type="void"/>
+         </return-value>
+         <parameters>
+-          <parameter name="arg1" transfer-ownership="none">
+-            <doc xml:space="preserve"
+-                 filename="server.c"
+-                 line="258">ID of the #DbusmenuMenuitem changing.</doc>
++          <parameter name="object" transfer-ownership="none">
+             <type name="gint" c:type="gint"/>
+           </parameter>
+         </parameters>
+@@ -3903,7 +3743,7 @@
      <docsection name="menuitem">
        <doc xml:space="preserve"
             filename="menuitem.h"
@@ -464,7 +517,7 @@ diff --color -ru gir-files/Dbusmenu-0.4.gir /usr/share/gir-1.0/Dbusmenu-0.4.gir
  single item in a menu.  It gets created on the server side
  and copied over to the client side where it gets rendered.  As
  the server starts to change it, and grow it, and do all kinds
-@@ -3901,6 +3762,66 @@
+@@ -3922,6 +3762,66 @@
  menuitem to a new object that can be moved around appropriately within
  the new menu structure.</doc>
      </docsection>

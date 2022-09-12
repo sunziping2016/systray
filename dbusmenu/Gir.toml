@@ -11,9 +11,7 @@ generate_safety_asserts = true
 deprecate_by_min_version = true
 single_version_file = true
 
-generate = [
-    # "Dbusmenu.Server",
-]
+generate = []
 
 [[object]]
 name = "Dbusmenu.Menuitem"
@@ -35,10 +33,22 @@ manual_traits = ["ClientExtManual"]
     name = "add_type_handler"
     ignore = true
     [[object.function]]
-    pattern = "get_status|get_text_direction"
+    pattern = "get_(status|text_direction)"
     ignore = true
     doc_trait_name = "ClientExtManual"
     [[object.signal]]
     pattern = "event-result|icon-theme-dirs-changed"
     ignore = true
     doc_trait_name = "ClientExtManual"
+[[object]]
+name = "Dbusmenu.Server"
+status = "generate"
+manual_traits = ["ServerExtManual"]
+    [[object.function]]
+    pattern = "(get|set)_(status|text_direction)"
+    ignore = true
+    doc_trait_name = "ServerExtManual"
+    [[object.signal]]
+    name = "item-property-updated"
+    ignore = true
+    doc_trait_name = "ServerExtManual"
