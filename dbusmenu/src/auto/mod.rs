@@ -8,6 +8,9 @@ pub use self::client::Client;
 mod menuitem;
 pub use self::menuitem::Menuitem;
 
+mod menuitem_proxy;
+pub use self::menuitem_proxy::MenuitemProxy;
+
 mod server;
 pub use self::server::Server;
 
@@ -15,5 +18,6 @@ pub use self::server::Server;
 pub mod traits {
     pub use super::client::ClientExt;
     pub use super::menuitem::MenuitemExt;
+    pub use super::menuitem_proxy::MenuitemProxyExt;
     pub use super::server::ServerExt;
 }

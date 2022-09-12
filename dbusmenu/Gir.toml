@@ -11,7 +11,9 @@ generate_safety_asserts = true
 deprecate_by_min_version = true
 single_version_file = true
 
-generate = []
+generate = [
+    "Dbusmenu.MenuitemProxy",
+]
 
 [[object]]
 name = "Dbusmenu.Menuitem"
