@@ -29,12 +29,16 @@ manual_traits = ["MenuitemExtManual"]
     doc_trait_name = "MenuitemExtManual"
 [[object]]
 name = "Dbusmenu.Client"
-# status = "generate"
+status = "generate"
 manual_traits = ["ClientExtManual"]
     [[object.function]]
     name = "add_type_handler"
     ignore = true
+    [[object.function]]
+    pattern = "get_status|get_text_direction"
+    ignore = true
+    doc_trait_name = "ClientExtManual"
     [[object.signal]]
-    name = "event-result"
+    pattern = "event-result|icon-theme-dirs-changed"
     ignore = true
     doc_trait_name = "ClientExtManual"

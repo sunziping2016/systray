@@ -1,6 +1,5 @@
 mod notifier_host;
 mod notifier_watcher;
-mod xembed_sni_proxy;
 
 pub use notifier_host::NotifierHost;
 pub use notifier_host::NotifierHostMessage;

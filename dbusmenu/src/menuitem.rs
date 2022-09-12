@@ -161,7 +161,7 @@ impl<O: IsA<Menuitem>> MenuitemExtManual for O {
         unsafe {
             connect_raw(
                 self.as_ptr() as *mut _,
-                b"property-changed\0".as_ptr() as *const _,
+                ffi::DBUSMENU_MENUITEM_SIGNAL_PROPERTY_CHANGED,
                 Some(transmute::<_, unsafe extern "C" fn()>(
                     property_changed_trampoline::<Self, F> as *const (),
                 )),
